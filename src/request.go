@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -44,18 +45,18 @@ func (a *Authors) String() string {
 }
 
 // QueryRequest func
-func QueryRequest(paperName string) *Response {
+func QueryRequest(o *Options) *Response {
 	urlBuilder := url.URL{
 		Scheme: "https",
 		Host:   "export.arxiv.org",
 		Path:   "api/query",
 	}
 	q := urlBuilder.Query()
-	q.Set("search_query", "all:"+paperName)
+	q.Set("search_query", "all:"+o.Title)
 	q.Set("start", "0")
-	q.Set("max_results", "2")
+	q.Set("max_results", strconv.Itoa(o.MaxResults))
 	urlBuilder.RawQuery = q.Encode()
-	fmt.Println(urlBuilder.String())
+	// fmt.Println(urlBuilder.String())
 
 	resp, err := http.Get(urlBuilder.String())
 	b := []byte{}
