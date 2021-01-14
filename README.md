@@ -12,5 +12,8 @@ without downloading a paper.
 
 ## Options
 | Option       | cli-arg | example       |
-| title        | -t      | -t="electron" |
-| max-results  | -n      | -n=10         |
+| :------------- | :----------: | -----------: |
+| title        | -t | -t="electron" |
+| max-results  | -n | -n=10         |
+
+__More to come!!!!__
