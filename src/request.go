@@ -34,6 +34,7 @@ type Author struct {
 // Authors struct
 type Authors []Author
 
+// String function returns the slice of Authors in string format
 func (a *Authors) String() string {
 	s := strings.Builder{}
 	for _, author := range *a {
@@ -52,11 +53,11 @@ func QueryRequest(o *Options) *Response {
 		Path:   "api/query",
 	}
 	q := urlBuilder.Query()
-	q.Set("search_query", "all:"+o.Title)
+	q.Set("search_query", fmt.Sprintf("%s:%s", o.SearchPrefix, o.QueryString))
 	q.Set("start", "0")
 	q.Set("max_results", strconv.Itoa(o.MaxResults))
 	urlBuilder.RawQuery = q.Encode()
-	// fmt.Println(urlBuilder.String())
+	fmt.Println(urlBuilder.String())
 
 	resp, err := http.Get(urlBuilder.String())
 	b := []byte{}
@@ -78,7 +79,7 @@ func QueryRequest(o *Options) *Response {
 	return &rs
 }
 
-func (p *Paper) Download() error {
+func (p *Paper) Download(outDir string) (string, error) {
 	urlBuilder := url.URL{
 		Scheme: "http",
 		Host:   "arxiv.org",
@@ -93,20 +94,24 @@ func (p *Paper) Download() error {
 	// Get the data
 	resp, err := http.Get(pdfPath)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer resp.Body.Close()
 
 	nsplit := strings.Split(p.Title, " ")
 	strings.Join(nsplit, "")
+
 	// Create the file
-	out, err := os.Create(strings.Join(nsplit, "") + ".pdf")
+	fileName := strings.Join(nsplit, "") + ".pdf"
+	fileName = strings.ReplaceAll(fileName, "'", "")
+	fileName = strings.ReplaceAll(fileName, "\"", "")
+	out, err := os.Create(outDir + fileName)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer out.Close()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
-	return err
+	return outDir + fileName, err
 }
